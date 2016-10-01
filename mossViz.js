@@ -30,9 +30,10 @@ d3.html("Moss Results.html", function(error, data) {
 		}
 	}
 	var nodeArray = [...nodeSet];
+	var commonPrefixLen = longestCommonPrefixLength(nodeArray);
 	var nodes = [];
 	for(let n of nodeSet) {
-		nodes.push({name: n});
+		nodes.push({name: n.substring(commonPrefixLen)});
 	}
 	
 	var links = [];
@@ -108,5 +109,22 @@ d3.html("Moss Results.html", function(error, data) {
 		d.fixed = true;
 		ticked();
 		force.resume();
+	}
+	
+	function longestCommonPrefixLength(texts) {
+    if(texts.length == 0) {
+      return 0;
+    }
+
+		var maxLen = texts[0].length;
+    for(var len = 0; len < maxLen; len++) {
+      var currentChar = texts[0].charAt(len);
+      for (var j = 1; j < texts.length; j++) {
+        if(len >= texts[j].length || texts[j].charAt(len) != currentChar) { //mismatch
+          return len;
+        }
+      }
+    }
+    return maxLen;
 	}
 });

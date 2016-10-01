@@ -10,4 +10,4 @@ It is a standard node-link diagram implemented with [D3](https://d3js.org) (v3 f
 Cliques of plagiarism should be easily detectable. Nodes can also be dragged around and fixed for manual layout.
 
 ##More to be Done
-It will be nice if the tool can directly fetch the result from an URL. Sometimes the submission path is too long; a prefix or suffix trauncation will be useful. Advanced layout algorithms, at least a simple border collision, are welcome.
+It will be nice if the tool can directly fetch the result from an URL. Sometimes the submission path is too long; a (manual) prefix or suffix trauncation will be useful. Advanced layout algorithms, at least a simple border collision, are welcome.
