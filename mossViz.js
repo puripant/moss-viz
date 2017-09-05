@@ -1,6 +1,7 @@
 var svg = d3.select("svg");
 var width = +svg.attr("width");
 var height = +svg.attr("height");
+var nodeRadius = 10;
 
 // // Get URL paramters
 // const url = window.location.search;
@@ -10,7 +11,7 @@ var height = +svg.attr("height");
 // var matches = url.match(queryStringRegEx("id"));
 // const id = matches ? matches[1] : undefined;
 // var mossUrl = id? ("http://moss.stanford.edu/results/" + id) : "Moss Results3.html";
-var mossUrl = "Moss Results3.html";
+var mossUrl = "Moss Results.html";
 
 const unwantedChars = ["/"];
 
@@ -71,7 +72,7 @@ d3.html(mossUrl, function(error, data) {
 
 	var force = d3.layout.force()
 		// .gravity(.05)
-		.distance(function(d) { return (1-d.weight)*width/10; })
+		.distance(function(d) { return (1-d.weight)*width/nodeRadius; })
 		.charge(-300)
 		.size([width, height])
 		.nodes(nodes)
@@ -84,7 +85,7 @@ d3.html(mossUrl, function(error, data) {
 		.selectAll("line")
 		.data(links)
 	    .enter().append("line")
-			.style("stroke-width", function(d) { return 10*d.weight; });
+			.style("stroke-width", function(d) { return nodeRadius*d.weight; });
 			// .style("stroke-opacity", function(d) { return d.weight; });
 
 	var node = svg.append("g")
@@ -94,7 +95,7 @@ d3.html(mossUrl, function(error, data) {
 	    .enter().append("g")
 
 	node.append("circle")
-		.attr("r", 10)
+		.attr("r", nodeRadius)
 		// .call(force.drag);
 		.call(d3.behavior.drag()
 			.on("dragstart", dragstarted)
@@ -106,13 +107,17 @@ d3.html(mossUrl, function(error, data) {
 		.text(function(d) { return d.name; });
 
 	function ticked() {
+		node.attr("transform", function(d) {
+			return "translate(" + Math.max(2*nodeRadius, Math.min(width  - 2*nodeRadius, d.x)) + "," +
+														Math.max(2*nodeRadius, Math.min(height - 2*nodeRadius, d.y)) + ")";
+			// return "translate(" + d.x + "," + d.y + ")";
+		});
+
 		link
 	    .attr("x1", function(d) { return d.source.x; })
 	    .attr("y1", function(d) { return d.source.y; })
 	    .attr("x2", function(d) { return d.target.x; })
 	    .attr("y2", function(d) { return d.target.y; });
-
-		node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 	}
 
 	function dragstarted(d) {
