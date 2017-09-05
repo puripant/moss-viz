@@ -2,13 +2,25 @@ var svg = d3.select("svg");
 var width = +svg.attr("width");
 var height = +svg.attr("height");
 
-d3.html("Moss Results.html", function(error, data) {
+// // Get URL paramters
+// const url = window.location.search;
+// const queryStringRegEx = function(query) {
+// 	return new RegExp("[?|&]" + query + "=([^&]*)");
+// };
+// var matches = url.match(queryStringRegEx("id"));
+// const id = matches ? matches[1] : undefined;
+// var mossUrl = id? ("http://moss.stanford.edu/results/" + id) : "Moss Results3.html";
+var mossUrl = "Moss Results3.html";
+
+const unwantedChars = ["/"];
+
+d3.html(mossUrl, function(error, data) {
 	if (error) throw error;
-	
+
 	var rows = data.querySelector("tbody").querySelectorAll("tr");
-	
+
 	var nodeSet = new Set();
-	var pairs = []
+	var pairs = [];
 	var maxWeight = -1;
 	var sumWeight = 0;
 	for(var r = 0; r < rows.length; r++) {
@@ -18,10 +30,17 @@ d3.html("Moss Results.html", function(error, data) {
 			for(var c = 0; c < 2; c++) { // two student ids
 				var text = columns.item(c).querySelector("a").textContent;
 				var nodeId = text.substring(0, text.lastIndexOf(" "));
+
+				unwantedChars.forEach(function(c) {
+					nodeId = nodeId.replace(new RegExp(c, 'g'), "");
+				});
+
+				//TODO use percentage for link weight (but the percentages of two nodes are not necessary the same).
+
 				nodeSet.add(nodeId);
 				pair.push(nodeId);
 			}
-			
+
 			let weight = +columns.item(2).textContent
 			maxWeight = Math.max(maxWeight, weight);
 			sumWeight += weight;
@@ -29,34 +48,37 @@ d3.html("Moss Results.html", function(error, data) {
 			pairs.push(pair);
 		}
 	}
+
 	var nodeArray = [...nodeSet];
 	var commonPrefixLen = longestCommonPrefixLength(nodeArray);
-	var nodes = [];
-	for(let n of nodeSet) {
-		nodes.push({name: n.substring(commonPrefixLen)});
-	}
-	
+	nodes = [];
+	nodeArray = nodeArray.map(function(node) {
+		var shortNode = node.substring(commonPrefixLen);
+		nodes.push({name: shortNode});
+		return shortNode;
+	});
+
 	var links = [];
 	for(let pair of pairs) {
 		if(pair[2] > sumWeight/pairs.length) {
 			links.push({
-				source: nodeArray.indexOf(pair[0]), 
-				target: nodeArray.indexOf(pair[1]),
+				source: nodeArray.indexOf(pair[0].substring(commonPrefixLen)),
+				target: nodeArray.indexOf(pair[1].substring(commonPrefixLen)),
 				weight: pair[2]/maxWeight
 			});
 		}
 	}
-	
+
 	var force = d3.layout.force()
 		// .gravity(.05)
 		.distance(function(d) { return (1-d.weight)*width/10; })
-		.charge(-1000)
+		.charge(-300)
 		.size([width, height])
 		.nodes(nodes)
 		.links(links)
 		.on("tick", ticked)
 		.start();
-	
+
 	var link = svg.append("g")
   		.attr("class", "links")
 		.selectAll("line")
@@ -64,13 +86,13 @@ d3.html("Moss Results.html", function(error, data) {
 	    .enter().append("line")
 			.style("stroke-width", function(d) { return 10*d.weight; });
 			// .style("stroke-opacity", function(d) { return d.weight; });
-	
+
 	var node = svg.append("g")
   		.attr("class", "nodes")
   	.selectAll("circle")
 		.data(nodes)
 	    .enter().append("g")
-		
+
 	node.append("circle")
 		.attr("r", 10)
 		// .call(force.drag);
@@ -82,7 +104,7 @@ d3.html("Moss Results.html", function(error, data) {
 	node.append("text")
 		.attr("dy", "-1em")
 		.text(function(d) { return d.name; });
-	
+
 	function ticked() {
 		link
 	    .attr("x1", function(d) { return d.source.x; })
@@ -101,7 +123,7 @@ d3.html("Moss Results.html", function(error, data) {
 		d.px += d3.event.dx;
     d.py += d3.event.dy;
     d.x += d3.event.dx;
-    d.y += d3.event.dy; 
+    d.y += d3.event.dy;
     ticked();
 	}
 
@@ -110,8 +132,15 @@ d3.html("Moss Results.html", function(error, data) {
 		ticked();
 		force.resume();
 	}
-	
+
 	function longestCommonPrefixLength(texts) {
+		// // Automatic prefix truncation by finding common starting substring https://stackoverflow.com/questions/1916218/find-the-longest-common-starting-substring-in-a-set-of-strings/1917041#1917041
+		// nodeArray.sort();
+		// var i = 0;
+		// while(i < nodeArray[0].length && nodeArray[0].charAt(i) === nodeArray[nodes.length-1].charAt(i)) {
+		// 	i++;
+		// }
+
     if(texts.length == 0) {
       return 0;
     }
