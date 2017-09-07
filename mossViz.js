@@ -3,15 +3,16 @@ var width = +svg.attr("width");
 var height = +svg.attr("height");
 var nodeRadius = 10;
 
-// // Get URL paramters
-// const url = window.location.search;
-// const queryStringRegEx = function(query) {
-// 	return new RegExp("[?|&]" + query + "=([^&]*)");
-// };
-// var matches = url.match(queryStringRegEx("id"));
-// const id = matches ? matches[1] : undefined;
+// Get URL paramters
+const url = window.location.search;
+const queryStringRegEx = function(query) {
+	return new RegExp("[?|&]" + query + "=([^&]*)");
+};
+var matches = url.match(queryStringRegEx("id"));
+const id = matches ? matches[1] : undefined;
+var mossUrl = id? ("Moss Results" + id + ".html") : "Moss Results.html";
 // var mossUrl = id? ("http://moss.stanford.edu/results/" + id) : "Moss Results3.html";
-var mossUrl = "Moss Results.html";
+// var mossUrl = "Moss Results.html";
 
 const unwantedChars = ["/"];
 
